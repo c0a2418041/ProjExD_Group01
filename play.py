@@ -4,7 +4,6 @@ import time
 import math
 import random
 
-import numpy as np
 import pygame as pg
 
 
@@ -82,7 +81,7 @@ class Player(pg.sprite.Sprite):
                 self.rect.top = block.rect.bottom
             self.vy = 0
 
-    def update(self, key_lst: list[bool], screen: pg.Surface):
+    def update(self, key_lst: list[bool], screen: pg.Surface, spikes: pg.sprite.Group, springs: pg.sprite.Group) -> bool:
         """
         画面に表示する
         """
@@ -97,6 +96,12 @@ class Player(pg.sprite.Sprite):
             self.is_ground = False
 
         self.wall(self.vx, self.vy)
+        if pg.sprite.spritecollide(self, spikes, False):
+            return True
+
+        if pg.sprite.spritecollide(self, springs, False):
+            self.is_jumping = True
+            self.vy = SPEED_JUMP * 1.5
         screen.blit(self.image, self.rect)
 
 
@@ -119,7 +124,7 @@ class Block(pg.sprite.Sprite):
         self.rect.x += vx
 
 
-def map_loading(filename: str) -> pg.sprite.Group:
+def map_loading(filename: str) -> tuple[pg.sprite.Group, pg.sprite.Group, pg.sprite.Group]:
     """
     ./map/filename.txt からブロックの位置を読み込む関数
     引数: filename
@@ -130,6 +135,8 @@ def map_loading(filename: str) -> pg.sprite.Group:
     data = [row.replace("\n", "") for row in data]
     # Generating Surfaces
     blocks = pg.sprite.Group()
+    spikes = pg.sprite.Group()
+    springs = pg.sprite.Group()
     for i, row in enumerate(data):
         for j, char in enumerate(row):
             if char == "1":
@@ -138,7 +145,36 @@ def map_loading(filename: str) -> pg.sprite.Group:
                      BLOCK_HEIGHT * i, 
                      BLOCK_WIDTH * (j+1), 
                      BLOCK_HEIGHT * (i+1))))
-    return blocks
+            elif char == "2":
+                spikes.add(Spike((BLOCK_WIDTH * j,BLOCK_HEIGHT * i)))
+            elif char == "3":
+                springs.add(Spring((BLOCK_WIDTH * j,BLOCK_HEIGHT * i)))
+    return blocks, spikes, springs
+
+class Spike(pg.sprite.Sprite):
+    """
+    棘の設置
+    """
+    def __init__(self, pos: tuple[int, int]):
+        super().__init__()
+        self.image = pg.image.load("fig/toge.gif")
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update(self, vx: int = 0):
+        self.rect.x += vx
+
+class Spring(pg.sprite.Sprite):
+    """
+    ばねの設置
+    """
+    def __init__(self, pos: tuple[int, int]):
+        super().__init__()
+        self.image = pg.image.load("fig/bane.gif")
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update(self, vx: int = 0):
+        self.rect.x += vx
+
 
 
 def main():
@@ -146,7 +182,7 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
 
     #インスタンス生成
-    blocks = map_loading("map/stage1.txt")
+    blocks, spikes, springs = map_loading("map/stage1.txt")
     player = Player((150, HEIGHT - 150), blocks)
     half_screen = WIDTH // 2
 
@@ -172,10 +208,25 @@ def main():
         # Update
         if player.rect.x > half_screen:
             blocks.update(-player.vx) 
+            spikes.update(-player.vx)
+            springs.update(-player.vx)
         else:
             blocks.update()
+            spikes.update()
+            springs.update()
         blocks.draw(screen)
-        player.update(key_lst, screen)
+        spikes.draw(screen)
+        springs.draw(screen)
+
+        gameover = player.update(key_lst, screen, spikes, springs)
+        if gameover:
+            fonto = pg.font.Font(None, 80)
+            txt = fonto.render("Game Over",True,(255,0,0))
+            screen.blit(txt,[WIDTH//2-150,HEIGHT//2])
+            pg.display.update()
+            time.sleep(1)
+            break
+        player.update(key_lst, screen, spikes, springs)
 
         pg.display.update()
         tmr += 1
