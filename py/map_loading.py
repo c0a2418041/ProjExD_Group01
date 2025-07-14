@@ -40,6 +40,4 @@ def map_loading(filename: str):
             # プレイヤー
             elif char in player_ids:
                 players.add(Player((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), player_ids.index(char)))
-        
-        new_wind = 0
     f.close()

@@ -108,9 +108,11 @@ def main():
 
             # 風
             for wind in winds:
-                if abs(player.rect.y - wind.rect.y) < wind.image.get_height():
-                    if wind.angle == 0:  # 右向きの風
-                        if player.rect.x > wind.rect.x and player.rect.x < wind.rect.x + wind.reach:
+                dy = player.rect.y - wind.rect.y
+                dx = player.rect.x - wind.rect.x
+                if wind.angle == 0:  # 右向きの風
+                    if abs(dy) < 100:  # 100は扇風機の高さ
+                        if 0 < dx < wind.reach:
                             player.rect.x += wind.vx
                             collisions = check_collisions(player, wind.vx, 0)
 
@@ -119,9 +121,12 @@ def main():
                                 player.vx += wind.vx
                             else:
                                 player.rect.x -= wind.vx  # プレイヤーに当たったとき停止
+                        else:
+                            if player in player_others:  # 他プレイヤーが扇風機の範囲外に出たとき
+                                player.vx = 0
                             
-                    elif wind.angle == 180:
-                        pass
+                elif wind.angle == 180:  # 左向きの風
+                    pass
 
         # Screen Scrolling
         if player_main.vx > 0:
