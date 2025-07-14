@@ -10,7 +10,7 @@ def game_over(screen: pg.Surface):
     """
     # テキストの設定
     font = pg.font.Font(None, 74)
-    text = font.render("GAME OVER", True, (255, 0, 0))
+    text = font.render("Game Over", True, (255, 0, 0))
     text_rect = text.get_rect(center=(0, screen.get_height() // 2))
 
     white = pg.Surface((text_rect.width, text_rect.height))
@@ -28,6 +28,9 @@ def game_over(screen: pg.Surface):
 
     # プレイヤーとブロックの位置を初期化
     for player in Player.instances:
+        player.vx, player.vy = 0, 0
+        player.is_jumping = False
+        player.is_ground = True
         player.rect.x, player.rect.y = player.initial_pos
         player.true_pos = [player.rect.x, player.rect.y]
 

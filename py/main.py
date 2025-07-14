@@ -3,7 +3,9 @@ import sys
 
 import pygame as pg
 
+from Block import Block
 from Player import Player
+from Wind import Wind
 from const import WIDTH, HEIGHT, HALF_WIDTH
 from map_loading import map_loading
 from gameover import game_over
@@ -13,11 +15,15 @@ os.path.dirname(os.path.abspath(__file__))
 
 
 # マップ読み込み
-loaded = map_loading("map/stage1.txt")
-blocks = loaded[0]
-players = loaded[1]
-player_main: Player = players.sprites()[0]  # 最初のプレイヤーをメインに設定
+map_loading("map/stage1.txt")  # インスタンス生成
+
+
+# インスタンスの取得
+blocks = Block.instances
+players = Player.instances
+player_main = players.sprites()[0]  # 最初のプレイヤーをメインに設定
 player_others = players.sprites()[1:]  # 他のプレイヤー
+winds = Wind.instances
 
 
 def main():
@@ -62,9 +68,20 @@ def main():
         # Clear Screen
         screen.fill((255, 255, 255))
 
-	    # Update
+        # 常に受ける力
         for player in players:
+            # 重力
             player.vy += player.gravity
+
+            # 風
+            for wind in winds:
+                if wind.angle == 0:  # 右向きの風
+                    if player.rect.x > wind.rect.x and player.rect.x < wind.rect.x + wind.reach:
+                        player.rect.x += wind.vx
+                        player.true_pos[0] += wind.vx
+                        player.vx += wind.vx
+                elif wind.angle == 180:
+                    pass
 
         # Screen Scrolling
         for player in players:
@@ -72,23 +89,36 @@ def main():
                 if player.vx > 0:
                     if player.rect.x > HALF_WIDTH:
                         blocks.update(-player.vx)
+                        winds.update(-player.vx)
                         player.rect.x = HALF_WIDTH
 
                         for other_player in player_others:
                             other_player.rect.x -= player.vx
 
                 elif player.vx < 0:
-                    if player.rect.x >= HALF_WIDTH + player.vx:
+                    if player.rect.x >= HALF_WIDTH:
                         if player.true_pos[0] > HALF_WIDTH:
                             blocks.update(-player.vx)
+                            winds.update(-player.vx)
                             player.rect.x = HALF_WIDTH
 
                             for other_player in player_others:
                                 other_player.rect.x -= player.vx
-                        else:
+
+                    else:
+                        if player.true_pos[0] < HALF_WIDTH:
                             blocks.update(doReset=True)
+                            winds.update(doReset=True)
+
+                        else:
+                            blocks.update(-player.vx)
+                            winds.update(-player.vx)
+                            player.rect.x = HALF_WIDTH
+                            for other_player in player_others:
+                                other_player.rect.x -= player.vx
                 
         blocks.draw(screen)
+        winds.draw(screen)
 
         # Update
         for player in players:

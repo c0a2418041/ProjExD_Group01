@@ -6,7 +6,7 @@ class Block(pg.sprite.Sprite):
     """
     壁・地面に関するクラス
     """
-    instances = pg.sprite.Group()
+    instances = pg.sprite.Group()  # 全てのBlockインスタンスを管理するグループ
 
     def __init__(self, color: tuple[int, int, int], rect: tuple[int]):
         """

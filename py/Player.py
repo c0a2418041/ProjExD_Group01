@@ -12,7 +12,7 @@ class Player(pg.sprite.Sprite):
         pg.K_d: +1,
     }
 
-    instances = pg.sprite.Group()
+    instances = pg.sprite.Group()  # 全てのPlayerインスタンスを管理するグループ
 
     def __init__(self, center: tuple[int, int], id: str):
         """
@@ -20,7 +20,8 @@ class Player(pg.sprite.Sprite):
         """
         super().__init__()
         # Surface
-        self.image = pg.image.load(f"fig/{id}.gif")
+        self.id = id
+        self.image = pg.image.load(f"fig/{self.id}.gif")
         self.rect = self.image.get_rect()
         self.rect.x = center[0]
         self.rect.y = center[1]
@@ -115,12 +116,13 @@ class Player(pg.sprite.Sprite):
         """
         画面に表示する
         """
-        self.vx = 0
         if key_lst is not None:
             if key_lst[pg.K_a]:
                 self.vx = self.delta[pg.K_a] * self.walk_speed
-            if key_lst[pg.K_d]:
+            elif key_lst[pg.K_d]:
                 self.vx = self.delta[pg.K_d] * self.walk_speed
+            else:
+                self.vx = 0
         
         if self.is_jumping:
             self.vy += self.gravity
