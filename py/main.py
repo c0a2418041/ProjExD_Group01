@@ -26,6 +26,35 @@ player_others = players.sprites()[1:]  # 他のプレイヤー
 winds = Wind.instances
 
 
+def check_collisions(player: Player, dx: int, dy: int) -> tuple[list]:
+    """
+    プレイヤーの衝突判定を行う\n
+    引数: Playerインスタンス, xの移動量, yの移動量\n
+    戻り値: x方向の衝突プレイヤーリスト, y方向の衝突プレイヤーリスト,\n
+            x方向の衝突ブロックリスト, y方向の衝突ブロックリスト
+    """
+    hit_players_x = False
+    hit_players_y = False
+    hit_blocks_x = False
+    hit_blocks_y = False
+
+    # x方向の衝突判定
+    player.rect.x += dx
+    hit_players_x = pg.sprite.spritecollide(player, Player.instances, False)
+    hit_blocks_x = pg.sprite.spritecollide(player, Block.instances, False)
+    hit_players_x.remove(player)  # 自分自身を除外
+    player.rect.x -= dx
+
+    # y方向の衝突判定
+    player.rect.y += dy
+    hit_players_y = pg.sprite.spritecollide(player, Player.instances, False)
+    hit_blocks_y = pg.sprite.spritecollide(player, Block.instances, False)
+    hit_players_y.remove(player)  # 自分自身を除外
+    player.rect.y -= dy
+
+    return hit_players_x, hit_players_y, hit_blocks_x, hit_blocks_y
+
+
 def main():
     pg.display.set_caption("Test")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -56,7 +85,7 @@ def main():
                     next_main_player = player_others[0] if player_others else player_main
                     player_others.pop(0)
                     player_others.append(player_main)
-                    player_main.vx, player_main.vy = 0, 0
+                    player_main.vx = 0
         
         player_main = next_main_player
         next_main_player = player_main
@@ -65,6 +94,8 @@ def main():
         for player in players:
             if player.rect.y > HEIGHT:  # プレイヤーが奈落に落ちた場合
                 game_over(screen)
+                current_screen_mid = HALF_WIDTH
+                tmr = 0
                 break
         
         # Clear Screen
@@ -77,19 +108,20 @@ def main():
 
             # 風
             for wind in winds:
-                if abs(player.rect.y - wind.rect.y) < wind.reach:
+                if abs(player.rect.y - wind.rect.y) < wind.image.get_height():
                     if wind.angle == 0:  # 右向きの風
                         if player.rect.x > wind.rect.x and player.rect.x < wind.rect.x + wind.reach:
                             player.rect.x += wind.vx
-                            player.true_pos[0] += wind.vx
-                            player.vx += wind.vx
+                            collisions = check_collisions(player, wind.vx, 0)
+
+                            if not collisions[0] and not collisions[2]:  # 他のプレイヤーとブロックに衝突していない場合
+                                player.true_pos[0] += wind.vx
+                                player.vx += wind.vx
+                            else:
+                                player.rect.x -= wind.vx  # プレイヤーに当たったとき停止
+                            
                     elif wind.angle == 180:
                         pass
-        
-            # print(f"MAIN: {player_main.true_pos[0]}", end=", ")
-            # print("OTHER:", end=" ")
-            # for other_player in player_others:
-            #     print(other_player.true_pos[0])
 
         # Screen Scrolling
         if player_main.vx > 0:

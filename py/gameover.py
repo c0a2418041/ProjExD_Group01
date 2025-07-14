@@ -1,11 +1,13 @@
 from Block import Block
 from Player import Player
+from Wind import Wind
 
 import pygame as pg
 
+
 def game_over(screen: pg.Surface):
     """
-    ゲームオーバー画面を表示する関数
+    ゲームオーバー画面を表示する関数\n
     引数: screen: 描画先のSurface
     """
     # テキストの設定
@@ -26,7 +28,7 @@ def game_over(screen: pg.Surface):
             
     pg.time.delay(2000)  # 2秒間表示
 
-    # プレイヤーとブロックの位置を初期化
+    # 位置情報と状態の初期化
     for player in Player.instances:
         player.vx, player.vy = 0, 0
         player.is_jumping = False
@@ -36,3 +38,6 @@ def game_over(screen: pg.Surface):
 
     for block in Block.instances:
         block.update(doReset=True)
+
+    for wind in Wind.instances:
+        wind.update(doReset=True)

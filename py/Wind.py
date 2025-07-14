@@ -22,7 +22,7 @@ class Wind(pg.sprite.Sprite):
 
     def __init__(self, center: tuple[int], angle: int = 0, vel: list[int] = [5, 5], reach: int = 300):
         """
-        扇風機の初期位置を設定
+        扇風機の初期位置を設定\n
         引数: center: 扇風機の初期x,y座標
         """
         super().__init__()
@@ -43,7 +43,7 @@ class Wind(pg.sprite.Sprite):
 
     def update(self, vx: int = 0, doReset: bool = False):
         """
-        扇風機の位置を更新する
+        扇風機の位置を更新する\n
         引数: vx: x方向の移動量, doReset: 初期位置に戻すかどうか
         """
         if doReset:

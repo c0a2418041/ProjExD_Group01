@@ -7,7 +7,7 @@ from const import BLOCK_WIDTH, BLOCK_HEIGHT
 
 def map_loading(filename: str):
     """
-    ./map/filename.txt からマップを読み込み、ブロック等のインスタンスを生成する
+    ./map/filename.txt からマップを読み込み、ブロック等のインスタンスを生成する\n
     引数: filename
     """
     # 各プレイヤーに割り当てるID. 最大5人

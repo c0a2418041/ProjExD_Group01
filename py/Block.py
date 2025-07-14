@@ -24,7 +24,7 @@ class Block(pg.sprite.Sprite):
     
     def update(self, vx: int = 0, doReset: bool = False):
         """
-        ブロックの位置を更新する
+        ブロックの位置を更新する\n
         引数: vx: x方向の移動量, doReset: 初期位置に戻すかどうか
         """
         if doReset:
