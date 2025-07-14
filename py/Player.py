@@ -48,8 +48,7 @@ class Player(pg.sprite.Sprite):
         # x方向の衝突判定
         is_collide = False
 
-        if self.rect.x <= HALF_WIDTH:
-            self.rect.x += dx
+        self.rect.x += dx
         hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)
         hit_players.remove(self)  # 自分自身を除外
@@ -74,11 +73,11 @@ class Player(pg.sprite.Sprite):
                 is_collide = True
             self.vx = 0
 
-        if not is_collide:
-            self.true_pos[0] += dx
+        # if not is_collide:
+        #     self.true_pos[0] += dx
         
         # y方向の衝突判定
-        is_collide = False
+        # is_collide = False
         self.rect.y += dy
         hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)
@@ -110,7 +109,10 @@ class Player(pg.sprite.Sprite):
         
         if not is_collide:
             self.is_ground = False
-            self.true_pos[1] += dy
+        #     self.true_pos[1] += dy
+
+        self.true_pos[0] += self.vx
+        self.true_pos[1] += self.vy
 
     def update(self, key_lst: list[bool], screen: pg.Surface):
         """

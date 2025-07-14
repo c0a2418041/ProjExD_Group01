@@ -23,7 +23,7 @@ def map_loading(filename: str):
     winds = pg.sprite.Group()
     players = pg.sprite.Group()
 
-    for i, row in enumerate(data):
+    for i, row in enumerate(data):            
         for j, char in enumerate(row):
             # 地面・壁
             if char == "1":
@@ -32,6 +32,7 @@ def map_loading(filename: str):
                      BLOCK_HEIGHT * i, 
                      BLOCK_WIDTH * (j+1), 
                      BLOCK_HEIGHT * (i+1))))
+            
             # 扇風機
             elif char == "w":
                 winds.add(Wind((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
@@ -39,4 +40,6 @@ def map_loading(filename: str):
             # プレイヤー
             elif char in player_ids:
                 players.add(Player((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), player_ids.index(char)))
+        
+        new_wind = 0
     f.close()

@@ -33,6 +33,7 @@ def main():
     #インスタンス生成
     global player_main
     next_main_player = player_main
+    current_screen_mid = HALF_WIDTH
 
     #時間計測用
     tmr = 0
@@ -55,6 +56,7 @@ def main():
                     next_main_player = player_others[0] if player_others else player_main
                     player_others.pop(0)
                     player_others.append(player_main)
+                    player_main.vx, player_main.vy = 0, 0
         
         player_main = next_main_player
         next_main_player = player_main
@@ -75,47 +77,40 @@ def main():
 
             # 風
             for wind in winds:
-                if wind.angle == 0:  # 右向きの風
-                    if player.rect.x > wind.rect.x and player.rect.x < wind.rect.x + wind.reach:
-                        player.rect.x += wind.vx
-                        player.true_pos[0] += wind.vx
-                        player.vx += wind.vx
-                elif wind.angle == 180:
-                    pass
+                if abs(player.rect.y - wind.rect.y) < wind.reach:
+                    if wind.angle == 0:  # 右向きの風
+                        if player.rect.x > wind.rect.x and player.rect.x < wind.rect.x + wind.reach:
+                            player.rect.x += wind.vx
+                            player.true_pos[0] += wind.vx
+                            player.vx += wind.vx
+                    elif wind.angle == 180:
+                        pass
+        
+            # print(f"MAIN: {player_main.true_pos[0]}", end=", ")
+            # print("OTHER:", end=" ")
+            # for other_player in player_others:
+            #     print(other_player.true_pos[0])
 
         # Screen Scrolling
-        for player in players:
-            if player == player_main:
-                if player.vx > 0:
-                    if player.rect.x > HALF_WIDTH:
-                        blocks.update(-player.vx)
-                        winds.update(-player.vx)
-                        player.rect.x = HALF_WIDTH
+        if player_main.vx > 0:
+            if player_main.true_pos[0] > current_screen_mid:
+                blocks.update(-player_main.vx)
+                winds.update(-player_main.vx)
+                player_main.rect.x -= player_main.vx
+                current_screen_mid += player_main.vx
 
-                        for other_player in player_others:
-                            other_player.rect.x -= player.vx
+                for other_player in player_others:
+                    other_player.rect.x -= player_main.vx
+        
+        elif player_main.vx < 0:
+            if player_main.true_pos[0] < current_screen_mid:
+                blocks.update(-player_main.vx)
+                winds.update(-player_main.vx)
+                player_main.rect.x -= player_main.vx
+                current_screen_mid += player_main.vx
 
-                elif player.vx < 0:
-                    if player.rect.x >= HALF_WIDTH:
-                        if player.true_pos[0] > HALF_WIDTH:
-                            blocks.update(-player.vx)
-                            winds.update(-player.vx)
-                            player.rect.x = HALF_WIDTH
-
-                            for other_player in player_others:
-                                other_player.rect.x -= player.vx
-
-                    else:
-                        if player.true_pos[0] < HALF_WIDTH:
-                            blocks.update(doReset=True)
-                            winds.update(doReset=True)
-
-                        else:
-                            blocks.update(-player.vx)
-                            winds.update(-player.vx)
-                            player.rect.x = HALF_WIDTH
-                            for other_player in player_others:
-                                other_player.rect.x -= player.vx
+                for other_player in player_others:
+                    other_player.rect.x -= player_main.vx
                 
         blocks.draw(screen)
         winds.draw(screen)
