@@ -4,6 +4,8 @@ import sys
 import pygame as pg
 
 from Block import Block
+from Key import Key
+from Goal import Goal
 from Player import Player
 from OptionalBlock import OptionalBlock
 from Switch_Button import Switch_Button
@@ -14,7 +16,7 @@ from gameover import game_over
 
 
 os.path.dirname(os.path.abspath(__file__))
-
+pg.init()
 
 # マップ読み込み
 map_loading("map/stage1.txt")  # インスタンス生成
@@ -22,12 +24,14 @@ map_loading("map/stage1.txt")  # インスタンス生成
 
 # インスタンスの取得
 blocks: pg.sprite.Group = Block.instances  # 全ブロック
-blocks_optional: pg.sprite.Group = OptionalBlock.instances
-blocks_button: pg.sprite.Group = Switch_Button.instances
+blocks_optional: pg.sprite.Group = OptionalBlock.instances  # 全Optional Block
+blocks_button: pg.sprite.Group = Switch_Button.instances  # 全スイッチ
 players: pg.sprite.Group = Player.instances  # 全プレイヤー
 player_main: Player = players.sprites()[0]  # 操作キャラは, 初期はplayersの先頭にする
 player_others: pg.sprite.Group = players.sprites()[1:]  # 操作キャラ以外
 winds: pg.sprite.Group = Wind.instances  # 全扇風機
+keys: pg.sprite.Group = Key.instances  # 鍵の配列
+goals: pg.sprite.Group = Goal.instances  # ゴールの配列
 
 
 def check_collisions(player: Player, dx: int, dy: int) -> tuple[list]:
@@ -180,6 +184,8 @@ def main():
                 winds.update(-player_main.vx)
                 blocks_optional.update(-player_main.vx)
                 blocks_button.update(-player_main.vx)
+                keys.update(-player_main.vx)
+                goals.update(-player_main.vx)
 
                 player_main.rect.x -= player_main.vx
                 current_screen_mid += player_main.vx
@@ -193,6 +199,8 @@ def main():
                 winds.update(-player_main.vx)
                 blocks_optional.update(-player_main.vx)
                 blocks_button.update(-player_main.vx)
+                keys.update(-player_main.vx)
+                goals.update(-player_main.vx)
 
                 player_main.rect.x -= player_main.vx
                 current_screen_mid += player_main.vx
@@ -205,6 +213,8 @@ def main():
         winds.draw(screen)
         blocks_optional.draw(screen)
         blocks_button.draw(screen)
+        keys.draw(screen)
+        goals.draw(screen)
 
         for player in players:
             if player == player_main:  # 操作キャラのみキーボード操作で移動可能

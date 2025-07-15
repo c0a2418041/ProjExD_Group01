@@ -1,5 +1,7 @@
 import pygame as pg
 from Block import Block
+from Goal import Goal
+from Key import Key
 from Player import Player
 from OptionalBlock import OptionalBlock
 from Switch_Button import Switch_Button
@@ -26,6 +28,8 @@ def map_loading(filename: str):
     blocks_optional = pg.sprite.Group()
     blocks_button = pg.sprite.Group()
     winds = pg.sprite.Group()
+    keys = pg.sprite.Group()
+    goals = pg.sprite.Group()
     players = pg.sprite.Group()
 
     for i, row in enumerate(data):            
@@ -42,8 +46,17 @@ def map_loading(filename: str):
             elif char == "2":
                 blocks_optional.add(OptionalBlock((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
             
+            # スイッチ
             elif char == "3":
                 blocks_button.add(Switch_Button("ON", (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+            
+            # 鍵
+            elif char == "K":
+                keys.add(Key((BLOCK_WIDTH * j, BLOCK_HEIGHT * i, BLOCK_WIDTH * (j+1), BLOCK_HEIGHT * (i+1))))
+
+            # ゴール
+            elif char == "G":
+                goals.add(Goal((BLOCK_WIDTH * j, BLOCK_HEIGHT * i, BLOCK_WIDTH * (j+1), BLOCK_HEIGHT * (i+1))))
             
             # 扇風機
             elif char in wind_ids:
@@ -52,4 +65,5 @@ def map_loading(filename: str):
             # プレイヤー
             elif char in player_ids:
                 players.add(Player((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), player_ids.index(char)))
+            
     f.close()

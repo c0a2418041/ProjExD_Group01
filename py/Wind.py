@@ -1,5 +1,3 @@
-from Player import Player
-
 import math
 
 import pygame as pg

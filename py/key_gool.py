@@ -1,31 +1,3 @@
-import os
-import sys
-import time
-import math
-import random
-
-import pygame as pg
-
-
-# Screen
-WIDTH = 1100
-HEIGHT = 650
-
-
-# Block
-BLOCK_WIDTH = 50
-BLOCK_HEIGHT = 50
-
-
-# Player
-SPEED_WALK = 10
-SPEED_JUMP = -40
-SPEED_GRAVITY = 2
-
-
-os.path.dirname(os.path.abspath(__file__))
-
-
 class Player(pg.sprite.Sprite):
     """
     プレイヤーに関するクラス

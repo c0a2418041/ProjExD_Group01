@@ -1,7 +1,10 @@
 import pygame as pg
 from Block import Block
+from Goal import Goal, goal
+from Key import Key
 from OptionalBlock import OptionalBlock
 from Switch_Button import Switch_Button
+from Wind import Wind
 from const import SPEED_WALK, SPEED_JUMP, SPEED_GRAVITY
 
 
@@ -30,6 +33,11 @@ class Player(pg.sprite.Sprite):
         self.initial_pos = self.rect.x, self.rect.y
         self.true_pos = [self.rect.x, self.rect.y]
 
+        # Goal
+        self.font = pg.font.Font(None, 60)
+        self.show_goal = False  # ゴール表示フラグ
+        self.has_key = False  # 鍵取得フラグ
+
         # Flags
         self.is_ground = True
         self.is_jumping = True
@@ -52,13 +60,24 @@ class Player(pg.sprite.Sprite):
         is_collide = False
 
         self.rect.x += dx
-        hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)
-        hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)
+        hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)  # Block
+        hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)  # Optional Block
         hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+        hit_goal = pg.sprite.spritecollide(self, Goal.instances, False)  # Goal
+        hit_key = pg.sprite.spritecollide(self, Key.instances, False)  # Key
+        hit_players = pg.sprite.spritecollide(self, Player.instances, False)  # Player
+        hit_players.remove(self)  # 自分自身を除外
         hit_blocks.extend(hit_opt)
         hit_blocks.extend(pg.sprite.spritecollide(self, Switch_Button.instances, False))
-        hit_players = pg.sprite.spritecollide(self, Player.instances, False)
-        hit_players.remove(self)  # 自分自身を除外
+
+        if hit_key:
+            self.has_key = True
+            for key in hit_key:
+                key.image.fill((255,255,255))
+                key.image.set_colorkey((255, 255, 255))
+
+        if hit_goal and self.has_key:
+            self.show_goal = True
 
         # ブロックとの衝突
         for block in hit_blocks:
@@ -85,6 +104,8 @@ class Player(pg.sprite.Sprite):
         hit_button = pg.sprite.spritecollide(self, Switch_Button.instances, False)
         hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)
         hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+        hit_goal = pg.sprite.spritecollide(self, Goal.instances, False)  # Goal
+        hit_key = pg.sprite.spritecollide(self, Key.instances, False)  # Key
         hit_blocks.extend(hit_opt)
         hit_blocks.extend(hit_button)
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)
@@ -92,6 +113,15 @@ class Player(pg.sprite.Sprite):
 
         if not hit_button:
             self.is_on_button = False
+        
+        if hit_key:
+            self.has_key = True
+            for key in hit_key:
+                key.image.fill((255,255,255))
+                key.image.set_colorkey((255, 255, 255))
+
+        if hit_goal and self.has_key:
+            self.show_goal = True
 
         # ブロックとの衝突
         for block in hit_blocks:
@@ -158,3 +188,39 @@ class Player(pg.sprite.Sprite):
 
         self.wall(self.vx, self.vy)
         screen.blit(self.image, self.rect)
+        
+        # ゴールに触れたら表示
+        if self.show_goal:
+            global goal
+            goal(screen)
+            # 位置情報と状態の初期化
+            for player in Player.instances:
+                player.vx, player.vy = 0, 0
+                player.is_jumping = False
+                player.is_ground = True
+                player.rect.x, player.rect.y = player.initial_pos
+                player.true_pos = [player.rect.x, player.rect.y]
+                player.has_key = False
+                player.show_goal = False
+
+            for block in Block.instances:
+                block.update(doReset=True)
+            
+            for opt in OptionalBlock.instances:
+                opt.update(doReset=True)
+            
+            for btn in Switch_Button.instances:
+                btn.update(doReset=True)
+
+            for wind in Wind.instances:
+                wind.update(doReset=True)
+
+            for key in Key.instances:
+                key.update(doReset=True)
+
+            for g in Goal.instances:
+                g.update(doReset=True)
+
+        # 鍵取得していれば右上に表示
+        if self.has_key:
+            screen.blit(Key.image, Key.rect)

@@ -19,7 +19,15 @@ class Switch_Button(pg.sprite.Sprite):
         self.pos = pos
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
+        self.initial_pos = self.rect.x, self.rect.y
         self.instances.add(self)
 
-    def update(self, vx: int = 0):
-        self.rect.x += vx
+    def update(self, vx: int = 0, doReset: bool = False):
+        """
+        ブロックの位置を更新する\n
+        引数: vx: x方向の移動量
+        """
+        if doReset:
+            self.rect.x, self.rect.y = self.initial_pos
+        else:
+            self.rect.x += vx

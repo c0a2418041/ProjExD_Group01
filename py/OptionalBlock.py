@@ -15,11 +15,19 @@ class OptionalBlock(pg.sprite.Sprite):
         self.image.fill((255, 0, 0))  # 赤
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
+        self.initial_pos = self.rect.x, self.rect.y
         self.instances.add(self)
         self.visible = True
 
-    def update(self, vx: int = 0):
-        self.rect.x += vx
+    def update(self, vx: int = 0, doReset: bool = False):
+        """
+        ブロックの位置を更新する\n
+        引数: vx: x方向の移動量
+        """
+        if doReset:
+            self.rect.x, self.rect.y = self.initial_pos
+        else:
+            self.rect.x += vx
 
     def draw(self, screen: pg.Surface):
         if self.visible:

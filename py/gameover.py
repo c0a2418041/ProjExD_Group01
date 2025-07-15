@@ -1,4 +1,8 @@
 from Block import Block
+from Goal import Goal, goal
+from Key import Key
+from OptionalBlock import OptionalBlock
+from Switch_Button import Switch_Button
 from Player import Player
 from Wind import Wind
 
@@ -38,6 +42,18 @@ def game_over(screen: pg.Surface) -> None:
 
     for block in Block.instances:
         block.update(doReset=True)
+    
+    for opt in OptionalBlock.instances:
+        opt.update(doReset=True)
+    
+    for btn in Switch_Button.instances:
+        btn.update(doReset=True)
 
     for wind in Wind.instances:
         wind.update(doReset=True)
+
+    for key in Key.instances:
+        key.update(doReset=True)
+
+    for goal in Goal.instances:
+        goal.update(doReset=True)
