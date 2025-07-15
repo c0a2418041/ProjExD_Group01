@@ -6,6 +6,7 @@ import pygame as pg
 from Block import Block
 from Key import Key
 from Goal import Goal
+from Turret import Turret
 from Player import Player
 from OptionalBlock import OptionalBlock
 from Switch_Button import Switch_Button
@@ -32,6 +33,7 @@ player_others: pg.sprite.Group = players.sprites()[1:]  # 操作キャラ以外
 winds: pg.sprite.Group = Wind.instances  # 全扇風機
 keys: pg.sprite.Group = Key.instances  # 鍵の配列
 goals: pg.sprite.Group = Goal.instances  # ゴールの配列
+turrets: pg.sprite.Group = Turret.instances  # 砲台の配列
 
 
 def check_collisions(player: Player, dx: int, dy: int) -> tuple[list]:
@@ -182,6 +184,7 @@ def main():
             if player_main.true_pos[0] > current_screen_mid:
                 blocks.update(-player_main.vx)
                 winds.update(-player_main.vx)
+                turrets.update(-player_main.vx)
                 blocks_optional.update(-player_main.vx)
                 blocks_button.update(-player_main.vx)
                 keys.update(-player_main.vx)
@@ -197,6 +200,7 @@ def main():
             if player_main.true_pos[0] < current_screen_mid:
                 blocks.update(-player_main.vx)
                 winds.update(-player_main.vx)
+                turrets.update(-player_main.vx)
                 blocks_optional.update(-player_main.vx)
                 blocks_button.update(-player_main.vx)
                 keys.update(-player_main.vx)
@@ -211,6 +215,7 @@ def main():
         # Update
         blocks.draw(screen)
         winds.draw(screen)
+        turrets.draw(screen)
         blocks_optional.draw(screen)
         blocks_button.draw(screen)
         keys.draw(screen)

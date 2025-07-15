@@ -1,5 +1,6 @@
 import pygame as pg
 from Block import Block
+from Turret import Turret
 from Goal import Goal, goal
 from Key import Key
 from OptionalBlock import OptionalBlock
@@ -63,6 +64,7 @@ class Player(pg.sprite.Sprite):
         hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)  # Block
         hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)  # Optional Block
         hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+        hit_turret = pg.sprite.spritecollide(self, Turret.instances, False)  # Turret
         hit_goal = pg.sprite.spritecollide(self, Goal.instances, False)  # Goal
         hit_key = pg.sprite.spritecollide(self, Key.instances, False)  # Key
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)  # Player
@@ -78,6 +80,13 @@ class Player(pg.sprite.Sprite):
 
         if hit_goal and self.has_key:
             self.show_goal = True
+        
+        # 砲台
+        for turret in hit_turret:
+            if not turret.direction:  # 右向き
+                self.vx, self.vy = 300, -50
+            elif turret.direction == 180:  # 左向き
+                self.vx, self.vy = -300, 50
 
         # ブロックとの衝突
         for block in hit_blocks:

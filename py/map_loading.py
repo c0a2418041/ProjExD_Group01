@@ -5,6 +5,7 @@ from Key import Key
 from Player import Player
 from OptionalBlock import OptionalBlock
 from Switch_Button import Switch_Button
+from Turret import Turret
 from Wind import Wind
 from const import BLOCK_WIDTH, BLOCK_HEIGHT
 
@@ -17,6 +18,7 @@ def map_loading(filename: str):
     # 各プレイヤーに割り当てるID. 最大5人
     player_ids = "abcde"
     wind_ids = "wxyz"
+    turret_ids = "ABCD"
 
     # File Loading
     f = open(filename, "r", encoding="UTF-8")
@@ -27,6 +29,7 @@ def map_loading(filename: str):
     blocks = pg.sprite.Group()
     blocks_optional = pg.sprite.Group()
     blocks_button = pg.sprite.Group()
+    turrets = pg.sprite.Group()
     winds = pg.sprite.Group()
     keys = pg.sprite.Group()
     goals = pg.sprite.Group()
@@ -49,6 +52,10 @@ def map_loading(filename: str):
             # スイッチ
             elif char == "3":
                 blocks_button.add(Switch_Button("ON", (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+            
+            # 砲台
+            elif char in turret_ids:
+                turrets.add(Turret((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), 90 * turret_ids.index(char)))
             
             # 鍵
             elif char == "K":
