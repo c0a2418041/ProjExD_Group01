@@ -124,8 +124,50 @@ def main():
                             if player in player_others:  # 他プレイヤーが扇風機の範囲外に出たとき
                                 player.vx = 0
                             
-                elif wind.angle == 180:  # 未実装 左向きの風
-                    pass
+                elif wind.angle == 180:  # 左向きの風
+                    if abs(dy) < 100:
+                        if -wind.reach < dx < 0:
+                            player.rect.x += wind.vx
+                            collisions = check_collisions(player, wind.vx, 0)
+
+                            if not collisions[0] and not collisions[2]:  # 他のプレイヤーとブロックに衝突していない場合
+                                player.true_pos[0] += wind.vx
+                                player.vx += wind.vx
+                            else:
+                                player.rect.x -= wind.vx  # プレイヤーに当たったとき停止
+                        else:
+                            if player in player_others:  # 他プレイヤーが扇風機の範囲外に出たとき
+                                player.vx = 0
+                
+                elif wind.angle == 90:  # 上向きの風
+                    if abs(dx) < 100:
+                        if -wind.reach < dy < 0:
+                            player.rect.y -= wind.vy
+                            collisions = check_collisions(player, -wind.vy, 0)
+
+                            if not collisions[1] and not collisions[3]:  # 他のプレイヤーとブロックに衝突していない場合
+                                player.true_pos[1] += -wind.vy
+                                player.vy += -wind.vy
+                            else:
+                                player.rect.y -= -wind.vy  # プレイヤーに当たったとき停止
+                        else:
+                            if player in player_others:  # 他プレイヤーが扇風機の範囲外に出たとき
+                                player.vy = 0
+                
+                elif wind.angle == 270:  # 上向きの風
+                    if abs(dx) < 100:
+                        if 0 < dy < wind.reach:
+                            player.rect.y -= wind.vy
+                            collisions = check_collisions(player, -wind.vy, 0)
+
+                            if not collisions[1] and not collisions[3]:  # 他のプレイヤーとブロックに衝突していない場合
+                                player.true_pos[1] += -wind.vy
+                                player.vy += -wind.vy
+                            else:
+                                player.rect.y -= -wind.vy  # プレイヤーに当たったとき停止
+                        else:
+                            if player in player_others:  # 他プレイヤーが扇風機の範囲外に出たとき
+                                player.vy = 0
 
         # Screen Scrolling
         if player_main.vx > 0:  # 右に移動するとき

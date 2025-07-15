@@ -12,6 +12,7 @@ def map_loading(filename: str):
     """
     # 各プレイヤーに割り当てるID. 最大5人
     player_ids = "abcde"
+    wind_ids = "wxyz"
 
     # File Loading
     f = open(filename, "r", encoding="UTF-8")
@@ -34,8 +35,8 @@ def map_loading(filename: str):
                      BLOCK_HEIGHT * (i+1))))
             
             # 扇風機
-            elif char == "w":
-                winds.add(Wind((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+            elif char in wind_ids:
+                winds.add(Wind((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), 90 * wind_ids.index(char)))
 
             # プレイヤー
             elif char in player_ids:
