@@ -19,11 +19,11 @@ map_loading("map/stage1.txt")  # インスタンス生成
 
 
 # インスタンスの取得
-blocks = Block.instances
-players = Player.instances
-player_main = players.sprites()[0]  # 最初のプレイヤーをメインに設定
-player_others = players.sprites()[1:]  # 他のプレイヤー
-winds = Wind.instances
+blocks: list[Block] = Block.instances  # 全ブロック
+players: list[Player] = Player.instances  # 全プレイヤー
+player_main: Player = players.sprites()[0]  # 操作キャラは, 初期はplayersの先頭にする
+player_others: list[Player] = players.sprites()[1:]  # 操作キャラ以外
+winds: list[Wind] = Wind.instances  # 全扇風機
 
 
 def check_collisions(player: Player, dx: int, dy: int) -> tuple[list]:
@@ -59,10 +59,9 @@ def main():
     pg.display.set_caption("Test")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
 
-    #インスタンス生成
-    global player_main
+    global player_main  # グローバル変数にしないと, キャラ入れ替えのときにUnBoundLocalErrorが起きる
     next_main_player = player_main
-    current_screen_mid = HALF_WIDTH
+    current_screen_mid = HALF_WIDTH  # プレイヤーが画面中央を跨ぐと、画面スクロールが開始する
 
     #時間計測用
     tmr = 0
@@ -106,10 +105,10 @@ def main():
             # 重力
             player.vy += player.gravity
 
-            # 風
+            # 扇風機
             for wind in winds:
-                dy = player.rect.y - wind.rect.y
                 dx = player.rect.x - wind.rect.x
+                dy = player.rect.y - wind.rect.y
                 if wind.angle == 0:  # 右向きの風
                     if abs(dy) < 100:  # 100は扇風機の高さ
                         if 0 < dx < wind.reach:
@@ -125,11 +124,11 @@ def main():
                             if player in player_others:  # 他プレイヤーが扇風機の範囲外に出たとき
                                 player.vx = 0
                             
-                elif wind.angle == 180:  # 左向きの風
+                elif wind.angle == 180:  # 未実装 左向きの風
                     pass
 
         # Screen Scrolling
-        if player_main.vx > 0:
+        if player_main.vx > 0:  # 右に移動するとき
             if player_main.true_pos[0] > current_screen_mid:
                 blocks.update(-player_main.vx)
                 winds.update(-player_main.vx)
@@ -139,7 +138,7 @@ def main():
                 for other_player in player_others:
                     other_player.rect.x -= player_main.vx
         
-        elif player_main.vx < 0:
+        elif player_main.vx < 0:  # 左に移動するとき
             if player_main.true_pos[0] < current_screen_mid:
                 blocks.update(-player_main.vx)
                 winds.update(-player_main.vx)
@@ -149,14 +148,14 @@ def main():
                 for other_player in player_others:
                     other_player.rect.x -= player_main.vx
                 
+        # Update
         blocks.draw(screen)
         winds.draw(screen)
 
-        # Update
         for player in players:
-            if player == player_main:
+            if player == player_main:  # 操作キャラのみキーボード操作で移動可能
                 player.update(key_lst, screen)
-            else:
+            else:  # 操作キャラ以外は停止
                 player.update(key_lst=None, screen=screen)
 
         pg.display.update()

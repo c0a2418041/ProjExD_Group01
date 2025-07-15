@@ -5,9 +5,9 @@ from Wind import Wind
 import pygame as pg
 
 
-def game_over(screen: pg.Surface):
+def game_over(screen: pg.Surface) -> None:
     """
-    ゲームオーバー画面を表示する関数\n
+    ゲームオーバー画面を表示、状態を初期化する関数\n
     引数: screen: 描画先のSurface
     """
     # テキストの設定
