@@ -5,6 +5,8 @@ import pygame as pg
 
 from Block import Block
 from Player import Player
+from OptionalBlock import OptionalBlock
+from Switch_Button import Switch_Button
 from Wind import Wind
 from const import WIDTH, HEIGHT, HALF_WIDTH
 from map_loading import map_loading
@@ -19,11 +21,13 @@ map_loading("map/stage1.txt")  # インスタンス生成
 
 
 # インスタンスの取得
-blocks: list[Block] = Block.instances  # 全ブロック
-players: list[Player] = Player.instances  # 全プレイヤー
+blocks: pg.sprite.Group = Block.instances  # 全ブロック
+blocks_optional: pg.sprite.Group = OptionalBlock.instances
+blocks_button: pg.sprite.Group = Switch_Button.instances
+players: pg.sprite.Group = Player.instances  # 全プレイヤー
 player_main: Player = players.sprites()[0]  # 操作キャラは, 初期はplayersの先頭にする
-player_others: list[Player] = players.sprites()[1:]  # 操作キャラ以外
-winds: list[Wind] = Wind.instances  # 全扇風機
+player_others: pg.sprite.Group = players.sprites()[1:]  # 操作キャラ以外
+winds: pg.sprite.Group = Wind.instances  # 全扇風機
 
 
 def check_collisions(player: Player, dx: int, dy: int) -> tuple[list]:
@@ -66,10 +70,10 @@ def main():
     #時間計測用
     tmr = 0
     clock = pg.time.Clock()
-    while True:
+    while True: 
         key_lst = pg.key.get_pressed()
         for event in pg.event.get():
-            if event.type == pg.QUIT:
+            if event.type == pg.QUIT: 
                 return 0
             if event.type == pg.KEYDOWN:
                 # ジャンプ
@@ -174,6 +178,9 @@ def main():
             if player_main.true_pos[0] > current_screen_mid:
                 blocks.update(-player_main.vx)
                 winds.update(-player_main.vx)
+                blocks_optional.update(-player_main.vx)
+                blocks_button.update(-player_main.vx)
+
                 player_main.rect.x -= player_main.vx
                 current_screen_mid += player_main.vx
 
@@ -184,6 +191,9 @@ def main():
             if player_main.true_pos[0] < current_screen_mid:
                 blocks.update(-player_main.vx)
                 winds.update(-player_main.vx)
+                blocks_optional.update(-player_main.vx)
+                blocks_button.update(-player_main.vx)
+
                 player_main.rect.x -= player_main.vx
                 current_screen_mid += player_main.vx
 
@@ -193,6 +203,8 @@ def main():
         # Update
         blocks.draw(screen)
         winds.draw(screen)
+        blocks_optional.draw(screen)
+        blocks_button.draw(screen)
 
         for player in players:
             if player == player_main:  # 操作キャラのみキーボード操作で移動可能

@@ -1,6 +1,8 @@
 import pygame as pg
 from Block import Block
-from const import SPEED_WALK, SPEED_JUMP, SPEED_GRAVITY, HALF_WIDTH
+from OptionalBlock import OptionalBlock
+from Switch_Button import Switch_Button
+from const import SPEED_WALK, SPEED_JUMP, SPEED_GRAVITY
 
 
 class Player(pg.sprite.Sprite):
@@ -31,6 +33,7 @@ class Player(pg.sprite.Sprite):
         # Flags
         self.is_ground = True
         self.is_jumping = True
+        self.is_on_button = False
 
         # Speed
         self.vx, self.vy = 0, 0
@@ -50,6 +53,10 @@ class Player(pg.sprite.Sprite):
 
         self.rect.x += dx
         hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)
+        hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)
+        hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+        hit_blocks.extend(hit_opt)
+        hit_blocks.extend(pg.sprite.spritecollide(self, Switch_Button.instances, False))
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)
         hit_players.remove(self)  # 自分自身を除外
 
@@ -75,8 +82,16 @@ class Player(pg.sprite.Sprite):
 
         self.rect.y += dy
         hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)
+        hit_button = pg.sprite.spritecollide(self, Switch_Button.instances, False)
+        hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)
+        hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+        hit_blocks.extend(hit_opt)
+        hit_blocks.extend(hit_button)
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)
         hit_players.remove(self)  # 自分自身を除外
+
+        if not hit_button:
+            self.is_on_button = False
 
         # ブロックとの衝突
         for block in hit_blocks:
@@ -89,6 +104,23 @@ class Player(pg.sprite.Sprite):
                 self.rect.top = block.rect.bottom
                 is_collide = True
             self.vy = 0
+
+            if block in hit_button:
+                if not self.is_on_button:
+                    if block.state == "ON":
+                        block.state = "OFF"
+                    elif block.state == "OFF":
+                        block.state = "ON"
+
+                    block.image = pg.image.load(f"fig/{block.state}.png")
+                    for opt_blk in OptionalBlock.instances:
+                        opt_blk.visible = not opt_blk.visible
+                        if opt_blk.visible:  # 可視状態
+                            opt_blk.image.fill((255,0,0))
+                        else:  # 不可視
+                            opt_blk.image.fill((255,255,255))
+
+                    self.is_on_button = True
         
         # 他のプレイヤーとの衝突
         for player in hit_players:

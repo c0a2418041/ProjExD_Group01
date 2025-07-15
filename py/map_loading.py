@@ -1,6 +1,8 @@
 import pygame as pg
 from Block import Block
 from Player import Player
+from OptionalBlock import OptionalBlock
+from Switch_Button import Switch_Button
 from Wind import Wind
 from const import BLOCK_WIDTH, BLOCK_HEIGHT
 
@@ -21,6 +23,8 @@ def map_loading(filename: str):
     
     # Generating Sprites
     blocks = pg.sprite.Group()
+    blocks_optional = pg.sprite.Group()
+    blocks_button = pg.sprite.Group()
     winds = pg.sprite.Group()
     players = pg.sprite.Group()
 
@@ -33,6 +37,13 @@ def map_loading(filename: str):
                      BLOCK_HEIGHT * i, 
                      BLOCK_WIDTH * (j+1), 
                      BLOCK_HEIGHT * (i+1))))
+                
+            # Optional Block
+            elif char == "2":
+                blocks_optional.add(OptionalBlock((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+            
+            elif char == "3":
+                blocks_button.add(Switch_Button("ON", (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
             
             # 扇風機
             elif char in wind_ids:
