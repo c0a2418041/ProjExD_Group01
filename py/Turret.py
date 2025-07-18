@@ -23,12 +23,6 @@ class Turret(pg.sprite.Sprite):
         self.timer = 0
         self.instances.add(self)
 
-    def get_rect(self):
-        return self.rect
-
-    def get_direction(self):
-        return self.direction
-
     def update(self, vx: int = 0, doReset: bool = False):
         """
         砲台の位置を更新する\n

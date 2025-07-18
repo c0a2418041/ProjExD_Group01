@@ -6,6 +6,8 @@ from Player import Player
 from OptionalBlock import OptionalBlock
 from Switch_Button import Switch_Button
 from Turret import Turret
+from Spike import Spike
+from Spring import Spring
 from Wind import Wind
 from const import BLOCK_WIDTH, BLOCK_HEIGHT
 
@@ -30,6 +32,8 @@ def map_loading(filename: str):
     blocks_optional = pg.sprite.Group()
     blocks_button = pg.sprite.Group()
     turrets = pg.sprite.Group()
+    spikes = pg.sprite.Group()
+    springs = pg.sprite.Group()
     winds = pg.sprite.Group()
     keys = pg.sprite.Group()
     goals = pg.sprite.Group()
@@ -52,10 +56,14 @@ def map_loading(filename: str):
             # スイッチ
             elif char == "3":
                 blocks_button.add(Switch_Button("ON", (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
-            
-            # 砲台
-            elif char in turret_ids:
-                turrets.add(Turret((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), 90 * turret_ids.index(char)))
+
+            # 棘
+            elif char == "4":
+                spikes.add(Spike((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+
+            # ばね
+            elif char == "5":
+                springs.add(Spring((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
             
             # 鍵
             elif char == "K":
@@ -65,6 +73,10 @@ def map_loading(filename: str):
             elif char == "G":
                 goals.add(Goal((BLOCK_WIDTH * j, BLOCK_HEIGHT * i, BLOCK_WIDTH * (j+1), BLOCK_HEIGHT * (i+1))))
             
+            # 砲台
+            elif char in turret_ids:
+                turrets.add(Turret((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), 90 * turret_ids.index(char)))
+
             # 扇風機
             elif char in wind_ids:
                 winds.add(Wind((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), 90 * wind_ids.index(char)))

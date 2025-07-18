@@ -11,7 +11,7 @@ class Goal(pg.sprite.Sprite):
         ブロックの色, 座標の設定
         """
         super().__init__()
-        self.image = pg.image.load("fig/goal.png")
+        self.image = pg.transform.rotozoom(pg.image.load("fig/goal.gif"), 0, 2)
         self.rect = self.image.get_rect()
         self.rect.topleft = rect[:2]
         self.rect.bottomright = rect[2:]

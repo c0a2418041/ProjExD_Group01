@@ -1,6 +1,8 @@
 import pygame as pg
 from Block import Block
 from Turret import Turret
+from Spike import Spike
+from Spring import Spring
 from Goal import Goal, goal
 from Key import Key
 from OptionalBlock import OptionalBlock
@@ -42,6 +44,7 @@ class Player(pg.sprite.Sprite):
         # Flags
         self.is_ground = True
         self.is_jumping = True
+        self.is_on_turret = False
         self.is_on_button = False
 
         # Speed
@@ -65,28 +68,28 @@ class Player(pg.sprite.Sprite):
         hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)  # Optional Block
         hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
         hit_turret = pg.sprite.spritecollide(self, Turret.instances, False)  # Turret
+        hit_spike = pg.sprite.spritecollide(self, Spike.instances, False)  # Spike
+        hit_spring = pg.sprite.spritecollide(self, Spring.instances, False)  # Spring
         hit_goal = pg.sprite.spritecollide(self, Goal.instances, False)  # Goal
         hit_key = pg.sprite.spritecollide(self, Key.instances, False)  # Key
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)  # Player
         hit_players.remove(self)  # 自分自身を除外
+
         hit_blocks.extend(hit_opt)
+        hit_blocks.extend(hit_spike)
+        hit_blocks.extend(hit_spring)
         hit_blocks.extend(pg.sprite.spritecollide(self, Switch_Button.instances, False))
 
+        # 鍵
         if hit_key:
             self.has_key = True
             for key in hit_key:
                 key.image.fill((255,255,255))
                 key.image.set_colorkey((255, 255, 255))
 
+        # ゴール
         if hit_goal and self.has_key:
             self.show_goal = True
-        
-        # 砲台
-        for turret in hit_turret:
-            if not turret.direction:  # 右向き
-                self.vx, self.vy = 300, -50
-            elif turret.direction == 180:  # 左向き
-                self.vx, self.vy = -300, 50
 
         # ブロックとの衝突
         for block in hit_blocks:
@@ -97,6 +100,10 @@ class Player(pg.sprite.Sprite):
                 self.rect.left = block.rect.right
                 is_collide = True
             self.vx = 0
+
+            # 棘
+            if block in hit_spike:
+                pass
         
         # 他のプレイヤーとの衝突
         for player in hit_players:
@@ -107,28 +114,42 @@ class Player(pg.sprite.Sprite):
                 self.rect.left = player.rect.right
                 is_collide = True
             self.vx = 0
+        
+        # 砲台
+        for turret in hit_turret:
+            if not turret.direction:  # 右向き
+                self.vx, self.vy = 30, -10
+            elif turret.direction == 180:  # 左向き
+                self.vx, self.vy = -30, 10
 
         self.rect.y += dy
         hit_blocks = pg.sprite.spritecollide(self, Block.instances, False)
         hit_button = pg.sprite.spritecollide(self, Switch_Button.instances, False)
         hit_opt = pg.sprite.spritecollide(self, OptionalBlock.instances, False)
         hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+        hit_spike = pg.sprite.spritecollide(self, Spike.instances, False)  # Spike
+        hit_spring = pg.sprite.spritecollide(self, Spring.instances, False)  # Spring
         hit_goal = pg.sprite.spritecollide(self, Goal.instances, False)  # Goal
         hit_key = pg.sprite.spritecollide(self, Key.instances, False)  # Key
         hit_blocks.extend(hit_opt)
         hit_blocks.extend(hit_button)
+        hit_blocks.extend(hit_spike)
+        hit_blocks.extend(hit_spring)
         hit_players = pg.sprite.spritecollide(self, Player.instances, False)
         hit_players.remove(self)  # 自分自身を除外
 
+        # ボタンに触れているか
         if not hit_button:
             self.is_on_button = False
         
+        # 鍵
         if hit_key:
             self.has_key = True
             for key in hit_key:
                 key.image.fill((255,255,255))
                 key.image.set_colorkey((255, 255, 255))
 
+        # ゴール
         if hit_goal and self.has_key:
             self.show_goal = True
 
@@ -144,6 +165,11 @@ class Player(pg.sprite.Sprite):
                 is_collide = True
             self.vy = 0
 
+            # 棘
+            if block in hit_spike:
+                pass
+
+            # スイッチに触れたとき
             if block in hit_button:
                 if not self.is_on_button:
                     if block.state == "ON":
@@ -172,6 +198,10 @@ class Player(pg.sprite.Sprite):
                 self.rect.top = player.rect.bottom
                 is_collide = True
             self.vy = 0
+        
+        # ばね
+        if hit_spring:
+            self.vy = -20
         
         if not is_collide:
             self.is_ground = False

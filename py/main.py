@@ -10,6 +10,8 @@ from Turret import Turret
 from Player import Player
 from OptionalBlock import OptionalBlock
 from Switch_Button import Switch_Button
+from Spike import Spike
+from Spring import Spring
 from Wind import Wind
 from const import WIDTH, HEIGHT, HALF_WIDTH
 from map_loading import map_loading
@@ -34,6 +36,12 @@ winds: pg.sprite.Group = Wind.instances  # 全扇風機
 keys: pg.sprite.Group = Key.instances  # 鍵の配列
 goals: pg.sprite.Group = Goal.instances  # ゴールの配列
 turrets: pg.sprite.Group = Turret.instances  # 砲台の配列
+spikes: pg.sprite.Group = Spike.instances  # 棘の配列
+springs: pg.sprite.Group = Spring.instances  # ばねの配列
+render = pg.sprite.RenderUpdates()
+render.add(blocks, winds, turrets, 
+           spikes, springs, blocks_optional,
+           blocks_button, keys, goals)
 
 
 def check_collisions(player: Player, dx: int, dy: int) -> tuple[list]:
@@ -50,16 +58,32 @@ def check_collisions(player: Player, dx: int, dy: int) -> tuple[list]:
 
     # x方向の衝突判定
     player.rect.x += dx
-    hit_players_x = pg.sprite.spritecollide(player, Player.instances, False)
-    hit_blocks_x = pg.sprite.spritecollide(player, Block.instances, False)
-    hit_players_x.remove(player)  # 自分自身を除外
+    hit_blocks_x = pg.sprite.spritecollide(player, Block.instances, False)  # Block
+    hit_opt = pg.sprite.spritecollide(player, OptionalBlock.instances, False)  # Optional Block
+    hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+    hit_spike = pg.sprite.spritecollide(player, Spike.instances, False)  # Spike
+    hit_spring = pg.sprite.spritecollide(player, Spring.instances, False)  # Spring
+    hit_players = pg.sprite.spritecollide(player, Player.instances, False)  # Player
+    hit_players.remove(player)  # 自分自身を除外
+    hit_blocks_x.extend(hit_opt)
+    hit_blocks_x.extend(hit_spike)
+    hit_blocks_x.extend(hit_spring)
+    hit_blocks_x.extend(pg.sprite.spritecollide(player, Switch_Button.instances, False))
     player.rect.x -= dx
 
     # y方向の衝突判定
     player.rect.y += dy
-    hit_players_y = pg.sprite.spritecollide(player, Player.instances, False)
-    hit_blocks_y = pg.sprite.spritecollide(player, Block.instances, False)
-    hit_players_y.remove(player)  # 自分自身を除外
+    hit_blocks_y = pg.sprite.spritecollide(player, Block.instances, False)  # Block
+    hit_opt = pg.sprite.spritecollide(player, OptionalBlock.instances, False)  # Optional Block
+    hit_opt = [blk for blk in hit_opt if blk.visible]  # 可視状態のブロックだけ取り出す
+    hit_spike = pg.sprite.spritecollide(player, Spike.instances, False)  # Spike
+    hit_spring = pg.sprite.spritecollide(player, Spring.instances, False)  # Spring
+    hit_players = pg.sprite.spritecollide(player, Player.instances, False)  # Player
+    hit_players.remove(player)  # 自分自身を除外
+    hit_blocks_y.extend(hit_opt)
+    hit_blocks_y.extend(hit_spike)
+    hit_blocks_y.extend(hit_spring)
+    hit_blocks_y.extend(pg.sprite.spritecollide(player, Switch_Button.instances, False))
     player.rect.y -= dy
 
     return hit_players_x, hit_players_y, hit_blocks_x, hit_blocks_y
@@ -114,7 +138,18 @@ def main():
         for player in players:
             # 重力
             player.vy += player.gravity
+            if player.is_on_turret:
+                player.vx = 
 
+            # 砲台
+            if not player.is_on_turret:
+                for turret in pg.sprite.spritecollide(player, turrets, False):
+                    if not turret.direction:  # 右向き
+                        player.vx, player.vy = 30, -10
+                        player.is_on_turret = True
+                    elif turret.direction == 180:  # 左向き
+                        player.is_on_turret = True
+            
             # 扇風機
             for wind in winds:
                 dx = player.rect.x - wind.rect.x
@@ -179,16 +214,10 @@ def main():
                             if player in player_others:  # 他プレイヤーが扇風機の範囲外に出たとき
                                 player.vy = 0
 
-        # Screen Scrolling
+        # Update, Screen Scrolling
         if player_main.vx > 0:  # 右に移動するとき
             if player_main.true_pos[0] > current_screen_mid:
-                blocks.update(-player_main.vx)
-                winds.update(-player_main.vx)
-                turrets.update(-player_main.vx)
-                blocks_optional.update(-player_main.vx)
-                blocks_button.update(-player_main.vx)
-                keys.update(-player_main.vx)
-                goals.update(-player_main.vx)
+                render.update(-player_main.vx)
 
                 player_main.rect.x -= player_main.vx
                 current_screen_mid += player_main.vx
@@ -198,13 +227,7 @@ def main():
         
         elif player_main.vx < 0:  # 左に移動するとき
             if player_main.true_pos[0] < current_screen_mid:
-                blocks.update(-player_main.vx)
-                winds.update(-player_main.vx)
-                turrets.update(-player_main.vx)
-                blocks_optional.update(-player_main.vx)
-                blocks_button.update(-player_main.vx)
-                keys.update(-player_main.vx)
-                goals.update(-player_main.vx)
+                render.update(-player_main.vx)
 
                 player_main.rect.x -= player_main.vx
                 current_screen_mid += player_main.vx
@@ -212,14 +235,7 @@ def main():
                 for other_player in player_others:
                     other_player.rect.x -= player_main.vx
                 
-        # Update
-        blocks.draw(screen)
-        winds.draw(screen)
-        turrets.draw(screen)
-        blocks_optional.draw(screen)
-        blocks_button.draw(screen)
-        keys.draw(screen)
-        goals.draw(screen)
+        render.draw(screen)
 
         for player in players:
             if player == player_main:  # 操作キャラのみキーボード操作で移動可能
