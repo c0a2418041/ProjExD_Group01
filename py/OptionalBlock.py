@@ -9,15 +9,18 @@ class OptionalBlock(pg.sprite.Sprite):
     """
     instances = pg.sprite.Group()
 
-    def __init__(self, pos: tuple[int, int]):
+    def __init__(self, visible: bool, pos: tuple[int, int]):
         super().__init__()
+        self.visible = visible
         self.image = pg.Surface((BLOCK_WIDTH, BLOCK_HEIGHT))
-        self.image.fill((255, 0, 0))  # 赤
+        if self.visible:
+            self.image.fill((255, 0, 0))  # 赤
+        else:
+            self.image.fill((255,255,255))  # 透明（白）
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.initial_pos = self.rect.x, self.rect.y
         self.instances.add(self)
-        self.visible = True
 
     def update(self, vx: int = 0, doReset: bool = False):
         """
@@ -32,16 +35,3 @@ class OptionalBlock(pg.sprite.Sprite):
     def draw(self, screen: pg.Surface):
         if self.visible:
             screen.blit(self.image, self.rect)
-
-    def set_visible(self, visible: bool):
-        self.visible = visible
-
-    def active_group(cls) -> pg.sprite.Group:
-        """
-        現在可視状態のブロックだけをグループにして返す
-        """
-        group = pg.sprite.Group()
-        for block in cls.instances:
-            if block.visible:
-                group.add(block)
-        return group

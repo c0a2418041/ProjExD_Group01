@@ -20,7 +20,7 @@ def map_loading(filename: str):
     # 各プレイヤーに割り当てるID. 最大5人
     player_ids = "abcde"
     wind_ids = "wxyz"
-    turret_ids = "ABCD"
+    turret_ids = "ABCDEFGH"
 
     # File Loading
     f = open(filename, "r", encoding="UTF-8")
@@ -49,20 +49,28 @@ def map_loading(filename: str):
                      BLOCK_WIDTH * (j+1), 
                      BLOCK_HEIGHT * (i+1))))
                 
-            # Optional Block
+            # 可視ブロック（オン）
             elif char == "2":
-                blocks_optional.add(OptionalBlock((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+                blocks_optional.add(OptionalBlock(True, (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
             
-            # スイッチ
+            # 可視ブロック（オフ）
             elif char == "3":
+                blocks_optional.add(OptionalBlock(False, (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+            
+            # スイッチ（オン）
+            elif char == "4":
                 blocks_button.add(Switch_Button("ON", (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
+            
+            # スイッチ（オフ）
+            elif char == "5":
+                blocks_button.add(Switch_Button("OFF", (BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
 
             # 棘
-            elif char == "4":
+            elif char == "6":
                 spikes.add(Spike((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
 
             # ばね
-            elif char == "5":
+            elif char == "7":
                 springs.add(Spring((BLOCK_WIDTH * j, BLOCK_HEIGHT * i)))
             
             # 鍵
@@ -75,7 +83,7 @@ def map_loading(filename: str):
             
             # 砲台
             elif char in turret_ids:
-                turrets.add(Turret((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), 90 * turret_ids.index(char)))
+                turrets.add(Turret((BLOCK_WIDTH * j, BLOCK_HEIGHT * i), 45 * turret_ids.index(char)))
 
             # 扇風機
             elif char in wind_ids:
